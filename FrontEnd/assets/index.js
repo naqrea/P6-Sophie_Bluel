@@ -1,4 +1,7 @@
+// GET PROJETS ET CATEGORIES
+
 const worksUrl = "http://localhost:5678/api/works";
+const categoriesUrl = "http://localhost:5678/api/categories";
 const gallery = document.getElementById("gallery");
 const filters = document.getElementById("filters");
 
@@ -17,19 +20,11 @@ function showProjects(works) {
   });
 }
 
-function createFilterButtons(works) {
-  let category = new Map();
-
-  works.forEach((work) => {
-    category.set(work.category.id, work.category.name);
-  });
-
-  category.forEach((name, id) => {
-    let filter = document.createElement("li");
-    filter.textContent = name;
-    filters.appendChild(filter);
-    filter.addEventListener("click", () => filterProjectsByCategory(id));
-  });
+function showFilter(filter, name) {
+  filter.textContent = name;
+  filter.classList.add("filter");
+  filter.setAttribute("tabindex", "0");
+  filters.appendChild(filter);
 }
 
 function filterProjectsByCategory(categoryId) {
@@ -45,10 +40,35 @@ async function fetchWorks() {
     }
     works = await response.json();
     showProjects(works);
-    createFilterButtons(works);
+    let filter = document.createElement("li");
+    showFilter(filter, "Tous");
+    filter.addEventListener("click", () => {
+      gallery.innerHTML = "";
+      showProjects(works);
+    });
+  } catch (error) {
+    console.error(`Erreur lors de la récupération des données: ${error}`);
+  }
+}
+
+async function fetchCategories() {
+  try {
+    const response = await fetch(categoriesUrl);
+    if (!response.ok) {
+      throw new Error(`La requête a échoué avec le statut ${response.status}`);
+    }
+    categories = await response.json();
+    categories.forEach((category) => {
+      let filter = document.createElement("li");
+      showFilter(filter, category.name);
+      filter.addEventListener("click", () => {
+        filterProjectsByCategory(category.id);
+      });
+    });
   } catch (error) {
     console.error(`Erreur lors de la récupération des données: ${error}`);
   }
 }
 
 fetchWorks();
+fetchCategories();
