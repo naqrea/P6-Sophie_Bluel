@@ -159,8 +159,7 @@ function modifyHomePageForAuthenticatedUser() {
     const addProjectButton = document.getElementById("addProjectButton");
     const editModal = document.getElementById("editModal");
 
-    editProjectsButton.classList.add("edit-projects-button");
-    editProjectsButton.textContent = "modifier";
+    editProjectsButton.style.display = "flex";
     editProjectsButton.addEventListener("click", (e) => {
       e.preventDefault();
       editModal.style.display = "flex";
