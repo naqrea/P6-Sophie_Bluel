@@ -3,11 +3,7 @@ const categoriesUrl = "http://localhost:5678/api/categories";
 let works = [];
 let categories = [];
 
-/**
- * Affiche les projets dans l'élément cible.
- * @param {Array} works - Tableau des projets à afficher.
- * @param {HTMLElement} targetElement - Élément dans lequel afficher les projets.
- */
+// Affichage des projets
 function showProjects(works, targetElement) {
   targetElement.innerHTML = "";
   works.forEach((work) => {
@@ -25,12 +21,7 @@ function showProjects(works, targetElement) {
     targetElement.appendChild(project);
   });
 }
-
-/**
- * Affiche un filtre dans l'élément cible.
- * @param {HTMLElement} filter - Élément du filtre à configurer.
- * @param {string} name - Nom du filtre à afficher.
- */
+// Affichage des filtres
 function showFilter(filter, name) {
   filter.textContent = name;
   filter.classList.add("filter");
@@ -100,12 +91,26 @@ async function fetchCategories() {
     console.error(`Erreur lors de la récupération des données: ${error}`);
   }
 }
+// Ajoute les icônes de poubelle aux projets
+function addBinIcons() {
+  const projectFigures = document
+    .getElementById("modalProjects")
+    .querySelectorAll(".project-figure");
+  projectFigures.forEach((figure, index) => {
+    if (!figure.querySelector(".bin-icon")) {
+      const bin = document.createElement("img");
+      bin.src = "./assets/icons/bin.svg";
+      bin.classList.add("bin-icon");
+      bin.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const projectId = works[index].id;
+        deleteProject(projectId, figure);
+      });
+      figure.appendChild(bin);
+    }
+  });
+}
 
-/**
- * Supprime un projet via l'API et met à jour l'interface utilisateur.
- * @param {number} projectId - ID du projet à supprimer.
- * @param {HTMLElement} elementToDelete - Élément du projet à supprimer dans l'interface utilisateur.
- */
 async function deleteProject(projectId, elementToDelete) {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -127,6 +132,7 @@ async function deleteProject(projectId, elementToDelete) {
     works = works.filter((work) => work.id !== projectId);
     showProjects(works, document.getElementById("modalProjects"));
     showProjects(works, gallery);
+    addBinIcons();
     console.log(`Projet avec l'ID ${projectId} supprimé avec succès.`);
   } catch (error) {
     console.error(`Erreur lors de la suppression du projet: ${error}`);
@@ -150,39 +156,42 @@ function modifyHomePageForAuthenticatedUser() {
       });
     }
 
-    const adminControls = document.createElement("div");
-    adminControls.textContent = "Mode édition";
-    adminControls.classList.add("admin-controls-banner");
-    document.body.prepend(adminControls);
+    const editMode = document.createElement("div");
+    const editModeIcon = document.createElement("img");
+    const editModeTitle = document.createElement("p");
+    editModeIcon.src = "../assets/icons/editb.svg";
+    editMode.appendChild(editModeIcon);
+    editMode.appendChild(editModeTitle);
+    editModeTitle.textContent = "Mode édition";
+    editMode.classList.add("edit-mode-banner");
+    document.body.prepend(editMode);
 
     const editProjectsButton = document.getElementById("editProjectsButton");
     const addProjectButton = document.getElementById("addProjectButton");
     const editModal = document.getElementById("editModal");
 
-    editProjectsButton.classList.add("edit-projects-button");
-    editProjectsButton.textContent = "modifier";
+    editProjectsButton.style.display = "flex";
     editProjectsButton.addEventListener("click", (e) => {
       e.preventDefault();
       editModal.style.display = "flex";
       document.getElementById("addProjectForm").style.display = "none";
       document.getElementById("deleteProjectForm").style.display = "flex";
       showProjects(works, document.getElementById("modalProjects"));
+      addBinIcons();
 
       const projectFigures = document
         .getElementById("modalProjects")
         .querySelectorAll(".project-figure");
       projectFigures.forEach((figure, index) => {
-        if (!figure.querySelector(".bin-icon")) {
-          const bin = document.createElement("img");
-          bin.src = "./assets/icons/bin.svg";
-          bin.classList.add("bin-icon");
-          bin.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const projectId = works[index].id;
-            deleteProject(projectId, figure);
-          });
-          figure.appendChild(bin);
-        }
+        const bin = document.createElement("img");
+        bin.src = "./assets/icons/bin.svg";
+        bin.classList.add("bin-icon");
+        bin.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const projectId = works[index].id;
+          deleteProject(projectId, figure);
+        });
+        figure.appendChild(bin);
       });
     });
 
@@ -254,6 +263,24 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("deleteProjectForm").style.display = "none";
     document.getElementById("addProjectForm").style.display = "flex";
     document.getElementById("addProjectForm").reset();
+  });
+
+  const fileInput = document.getElementById("file");
+  const imagePreview = document.getElementById("imagePreview");
+
+  fileInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        imagePreview.src = event.target.result;
+        imagePreview.style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    } else {
+      imagePreview.src = "";
+      imagePreview.style.display = "none";
+    }
   });
 
   submitProjectButton.addEventListener("click", async (e) => {
