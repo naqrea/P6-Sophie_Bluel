@@ -393,6 +393,21 @@ footer nav ul {
   padding-right: 0.5rem;
 }
 
+#editProjectsButton {
+  display: none;
+  position: absolute;
+  top: 0.6em;
+  justify-content: center;
+  align-items: center;
+  right: 33%;
+  border: none;
+  background-color: inherit;
+  gap: 0.5em;
+}
+#editProjectsButton img {
+  width: 20px;
+  height: auto;
+}
 /* Modal Styles */
 #editModal {
   display: none; /* Masqué par défaut */
@@ -422,9 +437,16 @@ footer nav ul {
   width: 80%;
   max-width: 600px; /* Largeur max */
   height: 100%;
-  max-height: 80%; /* Hauteur max */
+  max-height: 600px; /* Hauteur max */
 }
-#deleteProjectForm,
+#deleteProjectForm {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
 #addProjectForm {
   width: 100%;
   height: 100%;
@@ -433,14 +455,23 @@ footer nav ul {
   align-items: center;
   justify-content: space-around;
 }
-
 #addProjectForm input,
-#addProjectForm label {
+#addProjectForm select {
   width: 80%;
   height: 50px;
   font-size: 1.2em;
   border: none;
   box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
+}
+
+#addProjectForm label {
+  width: 80%;
+  display: flex;
+  justify-content: flex-start;
+  font-family: "Work Sans";
+  font-weight: bolder;
+  font-size: 16px;
+  margin-bottom: -1em;
 }
 
 #addFile {

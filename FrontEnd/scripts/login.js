@@ -24,7 +24,7 @@ form.addEventListener("submit", function (e) {
     .then((data) => {
       if (data.token) {
         localStorage.setItem("token", data.token);
-        window.location.href = "../../index.html";
+        window.location.href = "../index.html";
       } else {
         htmlError.textContent = "Les champs saisis sont incorrects.";
       }
