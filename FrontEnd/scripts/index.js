@@ -29,13 +29,30 @@ function showFilter(filter, name) {
   filters.appendChild(filter);
 }
 
-/**
- * Filtre et affiche les projets par catégorie.
- * @param {number} categoryId - ID de la catégorie selon laquelle filtrer.
- */
+// Filtrer par categorie
 function filterProjectsByCategory(categoryId) {
-  const filteredWorks = works.filter((work) => work.category.id === categoryId);
+  const filteredWorks = works.filter(
+    (work) => work.category && work.category.id === categoryId
+  );
   showProjects(filteredWorks, gallery);
+}
+
+function resetFilters() {
+  filters.innerHTML = "";
+
+  // Ajouter le filtre "Tous"
+  const allFilter = document.createElement("li");
+  showFilter(allFilter, "Tous");
+  allFilter.addEventListener("click", () => showProjects(works, gallery));
+
+  // Ajouter les filtres pour chaque catégorie
+  categories.forEach((category) => {
+    const filter = document.createElement("li");
+    showFilter(filter, category.name);
+    filter.addEventListener("click", () =>
+      filterProjectsByCategory(category.id)
+    );
+  });
 }
 
 /**
@@ -58,6 +75,7 @@ async function fetchWorks() {
       const allFilter = document.createElement("li");
       showFilter(allFilter, "Tous");
       allFilter.addEventListener("click", () => showProjects(works, gallery));
+      allFilter.focus();
     }
   } catch (error) {
     console.error(`Erreur lors de la récupération des données: ${error}`);
@@ -102,7 +120,6 @@ function addBinIcons() {
       bin.src = "./assets/icons/bin.svg";
       bin.classList.add("bin-icon");
       bin.addEventListener("click", (e) => {
-        e.stopPropagation();
         const projectId = works[index].id;
         deleteProject(projectId, figure);
       });
@@ -111,6 +128,7 @@ function addBinIcons() {
   });
 }
 
+// Suppresion d'un projet
 async function deleteProject(projectId, elementToDelete) {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -216,7 +234,6 @@ function modifyHomePageForAuthenticatedUser() {
     };
   }
 }
-
 document.addEventListener("DOMContentLoaded", () => {
   fetchWorks();
   fetchCategories();
@@ -229,6 +246,38 @@ document.addEventListener("DOMContentLoaded", () => {
   const submitProjectButton = document.getElementById("submitProjectButton");
 
   const closeButton = document.querySelector(".close-button");
+
+  // Désactiver le bouton par défaut
+  submitProjectButton.disabled = true;
+  submitProjectButton.classList.add("disabled-button");
+
+  // Fonction pour vérifier l'état des champs
+  function checkFormFields() {
+    const fileInput = document.getElementById("file");
+    const titleInput = document.getElementById("title");
+    const categorySelect = document.getElementById("category");
+
+    if (
+      fileInput.files.length > 0 &&
+      titleInput.value.trim() !== "" &&
+      categorySelect.value !== ""
+    ) {
+      submitProjectButton.disabled = false;
+      submitProjectButton.classList.remove("disabled-button");
+    } else {
+      submitProjectButton.disabled = true;
+      submitProjectButton.classList.add("disabled-button");
+    }
+  }
+
+  // Ajouter des gestionnaires d'événements pour les champs de formulaire
+  const fileInput = document.getElementById("file");
+  const titleInput = document.getElementById("title");
+  const categorySelect = document.getElementById("category");
+
+  fileInput.addEventListener("change", checkFormFields);
+  titleInput.addEventListener("input", checkFormFields);
+  categorySelect.addEventListener("change", checkFormFields);
 
   // Afficher la modal pour l'édition des projets
   editProjectsButton.addEventListener("click", (e) => {
@@ -265,7 +314,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("addProjectForm").reset();
   });
 
-  const fileInput = document.getElementById("file");
   const imagePreview = document.getElementById("imagePreview");
 
   fileInput.addEventListener("change", (e) => {
@@ -314,6 +362,8 @@ document.addEventListener("DOMContentLoaded", () => {
       works.push(newWork);
       showProjects(works, document.getElementById("modalProjects"));
       showProjects(works, gallery);
+      fileInput.value = "";
+      imagePreview.src = "./assets/icons/picture.svg";
       console.log(`Projet ajouté avec succès: ${newWork.title}`);
       editModal.style.display = "none";
     } catch (error) {
